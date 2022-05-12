@@ -89,26 +89,31 @@ public:
 	}
 	void setISBN(char* ISBN)
 	{
-		this->author = new char[strlen(ISBN) + 1];
+		delete[] this->ISBN;
+		this->ISBN = new char[strlen(ISBN) + 1];
 		strcpy(this->ISBN, ISBN);
 	}
 	void setAuthor(char* author)
 	{
+		delete[] this->author;
 		this->author = new char[strlen(author) + 1];
 		strcpy(this->author, author);
 	}
 	void setTitle(char* title)
 	{
+		delete[] this->title;
 		this->title = new char[strlen(title) + 1];
 		strcpy(this->title, title);
 	}
 	void setText(char* text)
 	{
+		delete[] this->text;
 		this->text = new char[strlen(text) + 1];
-		this->text = text;
+		strcpy(this->text, text);
 	}
 	void setDescription(char* description)
 	{
+		delete[] this->description;
 		this->description = new char[strlen(description) + 1];
 		strcpy(this->description, description);
 	}
@@ -116,7 +121,7 @@ public:
 	{
 		free();
 		copyFrom(other);
-		return other;
+		return *this;
 	}
 	~Book()
 	{
@@ -171,11 +176,6 @@ public:
 		books = nullptr;
 		numberOfBooks = 0;
 	}
-	Library(Book* books, int numberOfBooks)
-	{
-		
-	}
-
 	void sortBooks()
 	{
 		char sortDir;
@@ -293,15 +293,15 @@ public:
 		while (!file.eof())
 		{
 			int i = 0;
-			file.getline(buff, strlen(buff), '@');
+			file.getline(buff, 10000, '@');
 			l.books[i].setAuthor(buff);
-			file.getline(buff, strlen(buff), '@');
+			file.getline(buff, 10000, '@');
 			l.books[i].setTitle(buff);
-			file.getline(buff, strlen(buff), '@');
+			file.getline(buff, 10000, '@');
 			l.books[i].setDescription(buff);
-			file.getline(buff, strlen(buff), '@');
+			file.getline(buff, 10000, '@');
 			l.books[i].setRating(atoi(buff));
-			file.getline(buff, strlen(buff), '@');
+			file.getline(buff, 10000, '@');
 			l.books[i].setISBN(buff);
 			i++;
 		}
@@ -313,19 +313,19 @@ public:
 		cin.get();
 		cout << "Author:";
 		char* newauthor = new char[100];
-		cin.getline(newauthor, strlen(newauthor));
+		cin.getline(newauthor, 100);
 		cout << "Title:";
 		char* newtitle = new char[100];
-		cin.getline(newtitle, strlen(newtitle));
+		cin.getline(newtitle, 100);
 		cout << "Description:";
 		char* newdescription = new char[100];
-		cin.getline(newdescription, strlen(newdescription));
+		cin.getline(newdescription, 100);
 		cout << "text file name:";
 		char* newtextFile = new char[100];
-		cin.getline(newtextFile, strlen(newtextFile));
+		cin.getline(newtextFile, 100);
 		cout << "text:";
-		char* newtext = new char[10000];
-		cin.getline(newtext, strlen(newtext));
+		char* newtext = new char[100000];
+		cin.getline(newtext, 100000);
 		ofstream file(newtextFile);
 		file << newtext;
 		file.close();
@@ -335,17 +335,17 @@ public:
 		cin.get();
 		cout << "ISBN:";
 		char* newISBN = new char[100];
-		cin.getline(newISBN, strlen(newISBN));
-		Book b(newauthor, newtitle, newdescription, newtextFile, newrating, newISBN);
-		numberOfBooks++;
-		books[numberOfBooks - 1] = b;
+		cin.getline(newISBN, 100);
 		ofstream booksFile("books.txt");
 		booksFile << newauthor << "@";
 		booksFile << newtitle << "@";
-		booksFile << newdescription << "@";
 		booksFile << newtextFile << "@";
+		booksFile << newdescription << "@";
 		booksFile << newrating << "@";
 		booksFile << newISBN << "@";
+		Book b(newauthor, newtitle, newtextFile, newdescription, newrating, newISBN);
+		//numberOfBooks++;
+		//books[numberOfBooks - 1] = b;
 		//ofstream booksFile("books.dat", ios::binary);
 		//size_t authorSize = strlen(newauthor);
 		//booksFile.write((const char*)authorSize, sizeof(authorSize));
@@ -411,33 +411,32 @@ public:
 					for (int j = 0; j < numberOfRows; j++)
 					{
 						char* row=new char[10000];
-						file.get(row, strlen(row));
+						file.get(row, 10000);
 					}
 				}
-
-				if (command == 's')
+				else if (command == 's')
 				{
-						char nextSentence;
-						while (!file.eof())
+					char nextSentence;
+					while (!file.eof())
+					{
+						char character = '0';
+						while (character != '?' && character != '.' && character != '!')
 						{
-							char character = '0';
-							while (character != '?' && character != '.' && character != '!')
-							{
-								file >> character;
-								cout << character;
-							}
-							cout << endl;
-							cout << "Continue?:";
-							cin >> nextSentence;
-							if (nextSentence=='y')
-							{
-								continue;
-							}
-							else if (nextSentence == 'n')
-							{
-								break;
-							}
+							file >> character;
+							cout << character;
 						}
+						cout << endl;
+						cout << "Continue?:";
+						cin >> nextSentence;
+						if (nextSentence=='y')
+						{
+							continue;
+						}
+						else if (nextSentence == 'n')
+						{
+							break;
+						}
+					}
 				}
 			}
 		}
