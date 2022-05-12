@@ -147,27 +147,20 @@ public:
 		file.write((const char*)&password, sizeof(password));
 		file.write((const char*)&adminAccess, sizeof(adminAccess));
 	}
-	bool checkPassword(char* password)
-	{
-		if (strcmp(password, PASS) == 0)
-		{
-			return 1;
-		}
-		return 0;
-	}
-	void setPassword()
-	{
-		cout << "Give password";
-		char* userPass;
-		cin.getline(userPass, 10);
-		password = new char[strlen(password) + 1];
-		strcpy(password, userPass);
-		if (checkPassword(password))
-		{
-			setAccess(1);
-		}
-		setAccess(0);
-	}
+	
+	//void setPassword()
+	//{
+	//	cout << "Give password";
+	//	char* userPass;
+	//	cin.getline(userPass, 10);
+	//	password = new char[strlen(password) + 1];
+	//	strcpy(password, userPass);
+	//	if (checkPassword(password))
+	//	{
+	//		setAccess(1);
+	//	}
+	//	setAccess(0);
+	//}
 };
 class Library{
 	Book* books;
@@ -186,7 +179,9 @@ public:
 	void sortBooks()
 	{
 		char sortDir;
+		cin >> sortDir;
 		char sortType;
+		cin >> sortType;
 		if (sortDir == 'u')
 		{
 			if (sortType = 'a')
@@ -291,6 +286,28 @@ public:
 			}
 		}
 	}
+	void castBooksToClass(Library& l)
+	{
+		ifstream file("books.txt");
+		char* buff = new char[10000];
+		while (!file.eof())
+		{
+			int i = 0;
+			file.getline(buff, strlen(buff), '@');
+			l.books[i].setAuthor(buff);
+			file.getline(buff, strlen(buff), '@');
+			l.books[i].setTitle(buff);
+			file.getline(buff, strlen(buff), '@');
+			l.books[i].setDescription(buff);
+			file.getline(buff, strlen(buff), '@');
+			l.books[i].setRating(atoi(buff));
+			file.getline(buff, strlen(buff), '@');
+			l.books[i].setISBN(buff);
+			i++;
+		}
+		delete[] buff;
+
+	}
 	void addBook()
 	{
 		cin.get();
@@ -311,33 +328,41 @@ public:
 		cin.getline(newtext, strlen(newtext));
 		ofstream file(newtextFile);
 		file << newtext;
+		file.close();
 		int newrating;
 		cout << "Rating:";
 		cin >> newrating;
 		cin.get();
 		cout << "ISBN:";
-		char* newISBN = new char[10];
+		char* newISBN = new char[100];
 		cin.getline(newISBN, strlen(newISBN));
 		Book b(newauthor, newtitle, newdescription, newtextFile, newrating, newISBN);
 		numberOfBooks++;
 		books[numberOfBooks - 1] = b;
-		ofstream booksFile("books.dat", ios::binary);
-		size_t authorSize = strlen(newauthor);
-		booksFile.write((const char*)authorSize, sizeof(authorSize));
-		booksFile.write((const char*)&newauthor, authorSize);
-		size_t titleSize = strlen(newtitle);
-		booksFile.write((const char*)titleSize, sizeof(titleSize));
-		booksFile.write((const char*)&newtitle, titleSize);
-		size_t textFileSize = strlen(newtextFile);
-		booksFile.write((const char*)textFileSize, sizeof(textFileSize));
-		booksFile.write((const char*)&newtextFile, textFileSize);
-		size_t desSize = strlen(newdescription);
-		booksFile.write((const char*)desSize, sizeof(desSize));
-		booksFile.write((const char*)&newdescription, desSize);
-		booksFile.write((const char*)&newrating, sizeof(newrating));
-		size_t ISBNSize = strlen(newISBN);
-		booksFile.write((const char*)&newISBN, ISBNSize);
-		booksFile.write((const char*)&newISBN, sizeof(newISBN));
+		ofstream booksFile("books.txt");
+		booksFile << newauthor << "@";
+		booksFile << newtitle << "@";
+		booksFile << newdescription << "@";
+		booksFile << newtextFile << "@";
+		booksFile << newrating << "@";
+		booksFile << newISBN << "@";
+		//ofstream booksFile("books.dat", ios::binary);
+		//size_t authorSize = strlen(newauthor);
+		//booksFile.write((const char*)authorSize, sizeof(authorSize));
+		//booksFile.write((const char*)&newauthor, authorSize);
+		//size_t titleSize = strlen(newtitle);
+		//booksFile.write((const char*)titleSize, sizeof(titleSize));
+		//booksFile.write((const char*)&newtitle, titleSize);
+		//size_t textFileSize = strlen(newtextFile);
+		//booksFile.write((const char*)textFileSize, sizeof(textFileSize));
+		//booksFile.write((const char*)&newtextFile, textFileSize);
+		//size_t desSize = strlen(newdescription);
+		//booksFile.write((const char*)desSize, sizeof(desSize));
+		//booksFile.write((const char*)&newdescription, desSize);
+		//booksFile.write((const char*)&newrating, sizeof(newrating));
+		//size_t ISBNSize = strlen(newISBN);
+		//booksFile.write((const char*)&newISBN, ISBNSize);
+		//booksFile.write((const char*)&newISBN, sizeof(newISBN));
 		delete[] newtext;
 		delete[] newauthor;
 		delete[] newdescription;
@@ -345,11 +370,12 @@ public:
 		delete[] newtitle;
 		delete[] newtextFile;
 		booksFile.close();
-		file.close();
 	}
 	void deleteBook()
 	{
-		char* delTitle;
+		cin.get();
+		cout << "type the title of the book you wan to delete: ";
+		char* delTitle = new char[100];
 		cin.getline(delTitle, 100);
 		for (int i = 0; i < numberOfBooks; i++)
 		{
@@ -366,42 +392,68 @@ public:
 	}
 	void showBook()
 	{
-		char* showTitle;
+		cout << "Enter title of book:"<<endl;
+		cin.get();
+		char* showTitle=new char[100];
 		cin.getline(showTitle, 100);
+		cout << "r-show book by rows"<<endl<<"s-show book by sentences"<<endl<<"rows or sentences:";
 		char command;
 		cin >> command;
 		for (int i = 0; i < numberOfBooks; i++)
 		{
 			if (showTitle == books[i].getTitle())
 			{
+				ifstream file(books[i].getText());
 				if (command == 'r')
 				{
 					int numberOfRows;
 					cin >> numberOfRows;
-					ifstream file(books[i].getText());
 					for (int j = 0; j < numberOfRows; j++)
 					{
-						char row[100];
-						file.get(row, 100);
+						char* row=new char[10000];
+						file.get(row, strlen(row));
 					}
 				}
 
 				if (command == 's')
 				{
-					ifstream file(books[i].getText());
-					char sentence[100];
-					file.get(sentence, 100, '.'||'?'||'!');
+						char nextSentence;
+						while (!file.eof())
+						{
+							char character = '0';
+							while (character != '?' && character != '.' && character != '!')
+							{
+								file >> character;
+								cout << character;
+							}
+							cout << endl;
+							cout << "Continue?:";
+							cin >> nextSentence;
+							if (nextSentence=='y')
+							{
+								continue;
+							}
+							else if (nextSentence == 'n')
+							{
+								break;
+							}
+						}
 				}
 			}
 		}
+		delete[] showTitle;
 	}
 	void getInfo()
 	{
+		cout << "a-Type author of the book" << endl << "t-Type title of the book" << endl << "i-Type ISBN of the book" << endl << "d-Type Part of the description of the book"<<endl;
+		cout << "Enter command:";
+		cin.get();
 		char command;
 		cin >> command;
 		if (command == 'a')
 		{
-			char* searchAuthor;
+			cin.get();
+			char* searchAuthor=new char[100];
 			cin.get(searchAuthor, 100);
 			for (int i = 0; i < numberOfBooks; i++)
 			{
@@ -416,7 +468,8 @@ public:
 		}
 		if (command == 't')
 		{
-			char* searchTitle;
+			cin.get();
+			char* searchTitle=new char[100];
 			cin.get(searchTitle, 100);
 			for (int i = 0; i < numberOfBooks; i++)
 			{
@@ -431,7 +484,8 @@ public:
 		}
 		if (command == 'i')
 		{
-			char* searchISBN;
+			cin.get();
+			char* searchISBN=new char[100];
 			cin.get(searchISBN, 100);
 			for (int i = 0; i < numberOfBooks; i++)
 			{
@@ -444,9 +498,10 @@ public:
 				}
 			}
 		}
-		if (command == 's')
+		if (command == 'd')
 		{
-			char* searchDescription;
+			cin.get();
+			char* searchDescription=new char[100];
 			cin.get(searchDescription, 100);
 			for (int i = 0; i < numberOfBooks; i++)
 			{
@@ -460,9 +515,13 @@ public:
 			}
 		}
 	}
-	void Login()
+	bool checkPassword(char* password)
 	{
-
+		if (strcmp(password, PASS) == 0)
+		{
+			return 1;
+		}
+		return 0;
 	}
 	void start()
 	{
