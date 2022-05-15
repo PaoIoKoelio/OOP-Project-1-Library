@@ -255,6 +255,7 @@ public:
 			cout << "Author:" << books[i].getAuthor() << endl;
 			cout << "Title:" << books[i].getTitle() << endl;
 			cout << "ISBN:" << books[i].getISBN() << endl;
+			cout << endl;
 		}
 	}
 	void castBooksToClass()
@@ -262,27 +263,32 @@ public:
 		ifstream file("books.txt");
 		numberOfBooks = getAmmountOfBooksInFile(file);
 		books = new Book[numberOfBooks];
-		file.seekg(0, ios::beg);
 		char buff[10000];
-		int i = 0;
-		while (!file.eof())
+		for (int i = 0; i < numberOfBooks;i++)
 		{
 			file.getline(buff, 10000, '@');
 			cout << buff<<endl;
 			books[i].setAuthor(buff);
+
 			file.getline(buff, 10000, '@');
 			cout << buff << endl;
 			books[i].setTitle(buff);
+
+			file.getline(buff, 10000, '@');
+			cout << buff << endl;
+			books[i].setText(buff);
+
 			file.getline(buff, 10000, '@');
 			cout << buff << endl;
 			books[i].setDescription(buff);
+
 			file.getline(buff, 10000, '@');
 			cout << buff << endl;
 			books[i].setRating(atoi(buff));
+
 			file.getline(buff, 10000, '@');
 			cout << buff << endl;
 			books[i].setISBN(buff);
-			i++;
 		}
 		file.close();
 	}
@@ -343,7 +349,6 @@ public:
 	}
 	void deleteBook()
 	{
-		cin.get();
 		cout << "type the title of the book you want to delete:";
 		char delTitle[100];
 		cin.getline(delTitle, 100);
@@ -351,11 +356,21 @@ public:
 		{
 			if (strcmp(delTitle, books[i].getTitle())==0)
 			{
-				for (int j = i; j < numberOfBooks-1; j++)
+				Book* temp = new Book[numberOfBooks-1];
+				for (int j = 0; j < numberOfBooks-1; j++)
 				{
-					books[i] = books[i + 1];
+					if (j<i)
+					{
+						temp[i] = books[i];
+					}
+					if (j >= i)
+					{
+						temp[i] = books[i + 1];
+					}
+					
 				}
-				books[numberOfBooks].free();
+				delete[] books;
+				books = temp;
 				numberOfBooks--;
 			}
 		}
@@ -401,7 +416,6 @@ public:
 					{
 						for (int j = 0; j < numberOfRows; j++)
 						{
-							
 							file.get(row, 100);
 							cout << row<<endl;
 						}
@@ -428,11 +442,16 @@ public:
 						{
 							file.get(character);
 							cout << character;
+							if (file.eof())
+							{
+								cout << "the end";
+								break;
+							}
 						}
 						cout << endl;
 						cout << "Continue?:";
 						cin >> nextSentence;
-						if (nextSentence=='y')
+						if (nextSentence == 'y')
 						{
 							continue;
 						}
@@ -446,30 +465,32 @@ public:
 			}
 		}
 	}
-	size_t getAmmountOfBooksInFile(ifstream& file)
+	int getAmmountOfBooksInFile(ifstream& file)
 	{
-		size_t counter=0;
+		int counter=-1;
 		while (!file.eof())
 		{
 			char ch;
 			file >> ch;
-			if (ch = '@')
+			if (ch == '@')
 			{
 				counter++;
 			}
 		}
-		cout << counter / 6;
+		file.clear();
+		file.seekg(0, ios::beg);
+		cout << counter/6;
 		return counter / 6;
 	}
 	void getInfo()
 	{
 		cout << "a-Type author of the book" << endl << "t-Type title of the book" << endl << "i-Type ISBN of the book" << endl << "d-Type Part of the description of the book"<<endl;
-		cout << "Enter command:";
-		cin.get();
+		cout << "Enter your choice:";
 		char command;
 		cin >> command;
 		if (command == 'a')
 		{
+			cout << "Author:";
 			cin.get();
 			char searchAuthor[100];
 			cin.get(searchAuthor, 100);
@@ -486,6 +507,7 @@ public:
 		}
 		if (command == 't')
 		{
+			cout << "Title:";
 			cin.get();
 			char searchTitle[100];
 			cin.get(searchTitle, 100);
@@ -502,6 +524,7 @@ public:
 		}
 		if (command == 'i')
 		{
+			cout << "ISBN:";
 			cin.get();
 			char searchISBN[100];
 			cin.get(searchISBN, 100);
@@ -518,6 +541,7 @@ public:
 		}
 		if (command == 'd')
 		{
+			cout << "Description:";
 			cin.get();
 			char searchDescription[100];
 			cin.get(searchDescription, 100);
@@ -551,6 +575,7 @@ public:
 		{
 			cout << "Enter command:";
 			cin >> command;
+			cin.ignore();
 			if (command == 'h')
 			{
 				cout << "Command guide:" << endl << "a-add a book" << endl << "r-remove a book" << endl << "s-sort books" << endl << "i-show info for book" << endl << "f-find Book" << endl << "c-close" << endl << "h-help" << endl;
@@ -566,7 +591,6 @@ public:
 			else if (command == 'r')
 			{
 				cout << "Enter password:";
-				cin.ignore();
 				cin.getline(newpas, 20);
 				if (checkPassword(newpas))
 				{
@@ -577,7 +601,6 @@ public:
 			else if (command == 'a')
 			{
 				cout << "Enter password:";
-				cin.ignore();
 				cin.getline(newpas, 20);
 				if (checkPassword(newpas))
 				{
@@ -591,7 +614,6 @@ public:
 			}
 			else if (command == 'f')
 			{
-				cin.ignore();
 				showBook();
 			}
 		}
@@ -601,7 +623,7 @@ public:
 int main()
 {
 	Library l;
-	//l.castBooksToClass();
+	l.castBooksToClass();
 	l.start();
 
 	return 0;
