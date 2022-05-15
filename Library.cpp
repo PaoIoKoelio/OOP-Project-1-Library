@@ -259,33 +259,31 @@ public:
 	}
 	void castBooksToClass()
 	{
-		Book* temp = new Book[100];
 		ifstream file("books.txt");
+		numberOfBooks = getAmmountOfBooksInFile(file);
+		books = new Book[numberOfBooks];
+		file.seekg(0, ios::beg);
 		char buff[10000];
 		int i = 0;
 		while (!file.eof())
 		{
 			file.getline(buff, 10000, '@');
 			cout << buff<<endl;
-			temp[i].setAuthor(buff);
+			books[i].setAuthor(buff);
 			file.getline(buff, 10000, '@');
 			cout << buff << endl;
-			temp[i].setTitle(buff);
+			books[i].setTitle(buff);
 			file.getline(buff, 10000, '@');
 			cout << buff << endl;
-			temp[i].setDescription(buff);
+			books[i].setDescription(buff);
 			file.getline(buff, 10000, '@');
 			cout << buff << endl;
-			temp[i].setRating(atoi(buff));
+			books[i].setRating(atoi(buff));
 			file.getline(buff, 10000, '@');
 			cout << buff << endl;
-			temp[i].setISBN(buff);
-			books[i] = temp[i];
+			books[i].setISBN(buff);
 			i++;
 		}
-		numberOfBooks = i;
-		delete[] books;
-		books = temp;
 		file.close();
 	}
 	void addBook()
@@ -306,9 +304,9 @@ public:
 		char newtextFile[100];
 		cin.getline(newtextFile, 100);
 
-		cout << "text:";
-		char newtext[100000];
-		cin.getline(newtext, 100000);
+		cout << "text(write @ at the end):";
+		char newtext[10000];
+		cin.getline(newtext, 10000, '@');
 
 		ofstream file(newtextFile);
 		file << newtext;
@@ -342,13 +340,6 @@ public:
 		temp[numberOfBooks - 1] = b;
 		delete[] books;
 		books = temp;
-
-		delete[] newtext;
-		delete[] newauthor;
-		delete[] newdescription;
-		delete[] newISBN;
-		delete[] newtitle;
-		delete[] newtextFile;
 	}
 	void deleteBook()
 	{
@@ -389,7 +380,7 @@ public:
 	}
 	void showBook()
 	{
-		cout << "Enter title of book:"<<endl;
+		cout << "Enter title of book:";
 		char showTitle[100];
 		cin.getline(showTitle, 100);
 		cout << "r-show book by rows"<<endl<<"s-show book by sentences"<<endl<<"rows or sentences:";
@@ -405,12 +396,14 @@ public:
 					cout << "How many rows:";
 					int numberOfRows;
 					cin >> numberOfRows;
+					char row[100];
 					while (!file.eof())
 					{
 						for (int j = 0; j < numberOfRows; j++)
 						{
-							char row[10000];
-							file.get(row, 10000);
+							
+							file.get(row, 100);
+							cout << row<<endl;
 						}
 						cout << "Continue?:";
 						char nextPage;
@@ -433,7 +426,7 @@ public:
 						char character = '0';
 						while (character != '?' && character != '.' && character != '!')
 						{
-							file >> character;
+							file.get(character);
 							cout << character;
 						}
 						cout << endl;
@@ -452,6 +445,21 @@ public:
 				file.close();
 			}
 		}
+	}
+	size_t getAmmountOfBooksInFile(ifstream& file)
+	{
+		size_t counter=0;
+		while (!file.eof())
+		{
+			char ch;
+			file >> ch;
+			if (ch = '@')
+			{
+				counter++;
+			}
+		}
+		cout << counter / 6;
+		return counter / 6;
 	}
 	void getInfo()
 	{
@@ -595,8 +603,6 @@ int main()
 	Library l;
 	//l.castBooksToClass();
 	l.start();
-	
-	cout << l.books[0].getAuthor();
 
 	return 0;
 }
